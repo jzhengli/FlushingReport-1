@@ -164,7 +164,7 @@ print '-' * 80
 #send daily report to Sewer Team Manager
 SendEmail(filepaths, isAttach, message, to, cc, emailSub)
 #Notify GIS team member
-SendEmail(filepaths_copy, isAttach, message, "zheng.li@raleighnc.gov", "", "Flushing Report Sent")
+SendEmail(filepaths_copy, isAttach, "Flushing Report has been sent to Sewer team.", "zheng.li@raleighnc.gov", "", "Flushing Report Sent")
 
 # else:
 # 	print "Fail to verify"
