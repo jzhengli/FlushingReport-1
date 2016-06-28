@@ -16,7 +16,8 @@ from shutil import copy2
 ##export report of previous day to excel
 def ExportReport(table, delta_date):
 	env.overwriteOutput = True
-	env.workspace = os.path.join(os.path.dirname(sys.argv[0]), "RPUD_TESTDB - MOBILE_EDIT_VERSION.sde") #the name of database connection may need to be changed when in production
+	env.workspace = "Database Connections/RPUD_TESTDB - MOBILE_EDIT_VERSION.sde"
+	#env.workspace = os.path.join(os.path.dirname(sys.argv[0]), "RPUD_TESTDB - MOBILE_EDIT_VERSION.sde") #the name of database connection may need to be changed when in production
 
 	if table == "RPUD.SewerMainFlushing":
 		reportName = "Gravity Main Flushing Report_"
@@ -31,7 +32,6 @@ def ExportReport(table, delta_date):
 
 	#query report table for records in previous day
 	whereClause = '"REPORT_DATE" < date \'' + str(today) + '\' AND "REPORT_DATE" > date \'' + str(yesterday) + '\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'
-	#fieldList = [["OBJECTID", 'OBJECTID'], ["REPORT_DATE", 'REPORT_DATE'], ["PU_NUM", 'PU_NUMBER'], ["CREW", 'CREW_LEADER'], ["TEAM_MEMBER", 'TEAM_MEMBER'], ["TRUCK", 'TRUCK'], ["TASK", 'JOB_TASK'], ["FACILITYID", 'FACILITYID'], ["DEBRIS", 'DEBRIS'], ["ROOTS", 'ROOTS'], ["GREASE", 'GREASE'], ["PIPE_MATL", 'PIPE_MATERIAL'], ["PIPE_SIZE", 'PIPE_SIZE'], ["MH_DIR", 'MH_DIRECTION'], ["MH_MATL", 'MH_MATERIAL'], ["MH_COND", 'MH_CONDITION'], ["NOZZLE", 'NOZZLE_TYPE'], ["FOOTAGE", 'FOOTAGE'], ["WEATHER", 'WEATHER'], ["TYPE", 'JOB_TYPE'], ["CUST_CONTACT", 'CUSTOMER_CONTACT'], ["INV_INFO", 'INVENTORY_INFO'], ["CCTV", 'CCTV_FOLLOWUP'], ["REPAIR", 'REPAIR_FOLLOWUP'], ["COMMENTS", 'COMMENTS'], ["TIME_START", 'TIME_START'], ["TIME_END", 'TIME_END'], ["DURATION", 'DURATION']]
 	arcpy.MakeQueryTable_management(table, 'queryTable', "", "", "", whereClause) 
 	print str(arcpy.GetCount_management('queryTable')) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y")
 
@@ -137,11 +137,12 @@ filepaths_copy = ["{0}/FR_copy_{1}.xls".format(os.path.dirname(filepaths[0]), ye
 print filepaths_copy
 ##send out email with attached excel report for previous day
 emailSub = "Daily Flushing Report"
-message = "Hi Jeff, \n\n"
-message += "Attached please find Flushing Report for " + yesterday.strftime("%b %d, %Y")
+#message = "Hi, \n\n"
+message = "Attached please find Flushing Report for " + yesterday.strftime("%b %d, %Y")
 message += "\n\nThanks,\n"
-message += "Joe\n\n"
-message += "Zheng (Joe) Li\nGIS Programmer/Analyst\nCity of Raleigh Public Utilities\n3304 Terminal Dr Bldg 300\nRaleigh, NC 27604\n919.996.2369"
+message += "PUGIS"
+#message += "Joe\n\n"
+#message += "Zheng (Joe) Li\nGIS Programmer/Analyst\nCity of Raleigh Public Utilities\n3304 Terminal Dr Bldg 300\nRaleigh, NC 27604\n919.996.2369"
 
 #email to send in test
 #to = "joe.li@raleighnc.gov"
@@ -163,7 +164,7 @@ print '-' * 80
 #send daily report to Sewer Team Manager
 SendEmail(filepaths, isAttach, message, to, cc, emailSub)
 #Notify GIS team member
-SendEmail(filepaths_copy, isAttach, "Flushing Report Notification", "zheng.li@raleighnc.gov", "", "Flushing Report Sent")
+SendEmail(filepaths_copy, isAttach, message, "zheng.li@raleighnc.gov", "", "Flushing Report Sent")
 
 # else:
 # 	print "Fail to verify"
