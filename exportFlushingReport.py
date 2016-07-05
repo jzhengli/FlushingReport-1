@@ -19,20 +19,20 @@ def ExportReport(table, delta_date):
 	env.workspace = "Database Connections/RPUD_TESTDB - MOBILE_EDIT_VERSION.sde"
 	#env.workspace = os.path.join(os.path.dirname(sys.argv[0]), "RPUD_TESTDB - MOBILE_EDIT_VERSION.sde") #the name of database connection may need to be changed when in production
 
-	if table == "RPUD.SewerMainFlushing":
-		reportName = "Gravity Main Flushing Report_"
-	elif table == "RPUD.SewerMHFlushing":
-		reportName = "Manhole Flushing Report_"
+	# if table == "RPUD.SewerMainFlushing":
+	# 	reportName = "Gravity Main Flushing Report_"
+	# elif table == "RPUD.SewerMHFlushing":
+	# 	reportName = "Manhole Flushing Report_"
 	today = datetime.date.today() + datetime.timedelta(hours=4)
-	yesterday = today - datetime.timedelta(days=delta_date) + datetime.timedelta(hours=4)
-	outputExcel = os.path.join("//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/", reportName + yesterday.strftime("%Y%m%d") + ".xls")
+	yesterday = today - datetime.timedelta(days=delta_date)
+	outputExcel = os.path.join("//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/", table + "_" + yesterday.strftime("%Y%m%d") + ".xls")
 	print "Input table is: " + table
 	print "Output Excel file is: " + os.path.basename(outputExcel)
 	print "Exporting table to Excel..."
 
 	#query report table for records in previous day
-	whereClause = '"REPORT_DATE" < date \'' + str(today) + '\' AND "REPORT_DATE" > date \'' + str(yesterday) + '\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'
-	arcpy.MakeQueryTable_management(table, 'queryTable', "", "", "", whereClause) 
+	whereClause = '"CREATED_DATE" < date \'{0}\' AND "CREATED_DATE" > date \'{1}\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'.format(str(today), str(yesterday))
+	arcpy.MakeQueryTable_management(table, 'queryTable', "NO_KEY_FIELD", "", "", whereClause) 
 	print str(arcpy.GetCount_management('queryTable')) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y")
 
 	#for test, print out fiels in queryTable
@@ -130,7 +130,7 @@ outputDir = "//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636
 deltaDate = 1 #can be changed if need multiple days report
 yesterday = ExportReport("RPUD.SewerMainFlushing", deltaDate)
 ExportReport("RPUD.SewerMHFlushing", deltaDate)
-reportList = ["{0}/Gravity Main Flushing Report_{1}.xls".format(outputDir, yesterday.strftime("%Y%m%d")), "{0}/Manhole Flushing Report_{1}.xls".format(outputDir, yesterday.strftime("%Y%m%d"))]
+reportList = ["{0}/RPUD.SewerMainFlushing_{1}.xls".format(outputDir, yesterday.strftime("%Y%m%d")), "{0}/RPUD.SewerMHFlushing_{1}.xls".format(outputDir, yesterday.strftime("%Y%m%d"))]
 filepaths = [CombineReport(reportList)]
 copy2(filepaths[0], "{0}/FR_copy_{1}.xls".format(os.path.dirname(filepaths[0]), yesterday.strftime("%Y%m%d")))
 filepaths_copy = ["{0}/FR_copy_{1}.xls".format(os.path.dirname(filepaths[0]), yesterday.strftime("%Y%m%d"))]
