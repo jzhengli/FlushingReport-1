@@ -1,0 +1,19 @@
+2016-07-06 12:28:01,395 **************************************Export Flushing Report***********************************************
+2016-07-06 12:28:01,395 Input table is: RPUD.SewerMainFlushing
+2016-07-06 12:28:01,395 Output Excel file is: RPUD.SewerMainFlushing_20160705.xls
+2016-07-06 12:28:01,395 Exporting table to Excel...
+2016-07-06 12:28:07,170 34 RPUD.SewerMainFlushing reports for Jul 05, 2016
+2016-07-06 12:28:08,635 RPUD.SewerMainFlushing_20160705.xls has been exported.
+2016-07-06 12:28:08,683 **************************************Export Flushing Report***********************************************
+2016-07-06 12:28:08,683 Input table is: RPUD.SewerMHFlushing
+2016-07-06 12:28:08,683 Output Excel file is: RPUD.SewerMHFlushing_20160705.xls
+2016-07-06 12:28:08,683 Exporting table to Excel...
+2016-07-06 12:28:10,556 1 RPUD.SewerMHFlushing reports for Jul 05, 2016
+2016-07-06 12:28:11,196 RPUD.SewerMHFlushing_20160705.xls has been exported.
+2016-07-06 12:28:11,273 Combining reports...
+2016-07-06 12:28:11,321 Email sent to sewer
+2016-07-06 12:28:11,321 message attached
+2016-07-06 12:28:11,336 Connected to server
+2016-07-06 12:28:11,759 Sending Email...
+2016-07-06 12:28:11,759 Email sent
+2016-07-06 12:28:11,759 Email notification to GIS team

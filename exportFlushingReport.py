@@ -11,7 +11,14 @@ from email import Encoders
 import xlwt, xlrd
 from xlutils.filter import process, XLRDReader, XLWTWriter
 from shutil import copy2
+import logging
 
+logging.basicConfig(filename=os.path.join(os.path.dirname(sys.argv[0]),'updates.log'),level=logging.INFO, format='%(asctime)s %(message)s')
+# log message to keep track
+def logMessage(msg):
+    print time.strftime("%Y-%m-%dT%H:%M:%S ", time.localtime()) + msg
+    logging.warning(msg)
+    return
 
 ##export report of previous day to excel
 def ExportReport(table, delta_date):
@@ -19,21 +26,18 @@ def ExportReport(table, delta_date):
 	env.workspace = "Database Connections/RPUD_TESTDB - MOBILE_EDIT_VERSION.sde"
 	#env.workspace = os.path.join(os.path.dirname(sys.argv[0]), "RPUD_TESTDB - MOBILE_EDIT_VERSION.sde") #the name of database connection may need to be changed when in production
 
-	# if table == "RPUD.SewerMainFlushing":
-	# 	reportName = "Gravity Main Flushing Report_"
-	# elif table == "RPUD.SewerMHFlushing":
-	# 	reportName = "Manhole Flushing Report_"
 	today = datetime.date.today() + datetime.timedelta(hours=4)
 	yesterday = today - datetime.timedelta(days=delta_date)
 	outputExcel = os.path.join("//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/", table + "_" + yesterday.strftime("%Y%m%d") + ".xls")
-	print "Input table is: " + table
-	print "Output Excel file is: " + os.path.basename(outputExcel)
-	print "Exporting table to Excel..."
+	logMessage("**************************************Export Flushing Report***********************************************")
+	logMessage("Input table is: " + table)
+	logMessage("Output Excel file is: " + os.path.basename(outputExcel))
+	logMessage("Exporting table to Excel...")
 
 	#query report table for records in previous day
 	whereClause = '"CREATED_DATE" < date \'{0}\' AND "CREATED_DATE" > date \'{1}\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'.format(str(today), str(yesterday))
 	arcpy.MakeQueryTable_management(table, 'queryTable', "NO_KEY_FIELD", "", "", whereClause) 
-	print str(arcpy.GetCount_management('queryTable')) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y")
+	logMessage(str(arcpy.GetCount_management('queryTable')) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y"))
 
 	#for test, print out fiels in queryTable
 	# fields = arcpy.ListFields('queryTable')
@@ -42,7 +46,7 @@ def ExportReport(table, delta_date):
 
 	#export queried table to excel, ALIAS option does not work here so far, need a solution
 	arcpy.TableToExcel_conversion('queryTable', outputExcel, 'ALIAS')
-	print os.path.basename(outputExcel) + " has been exported."
+	logMessage(os.path.basename(outputExcel) + " has been exported.")
 	#return yesterday date for naming
 	return yesterday
 	
@@ -69,15 +73,15 @@ def SendEmail(fPaths, isAttachmt, body, toList, ccList, subject):
 			Encoders.encode_base64(part)
 			part.add_header('Content-Disposition', 'attachment; filename="%s"' % os.path.basename(fPath))
 			msg.attach(part)
-			print "message attached"
+			logMessage("message attached")
 	server = smtplib.SMTP(HOST)
-	print "Connected to server"
+	logMessage("Connected to server")
 	server.sendmail(FROM, TO.split(",") + CC.split(","), msg.as_string())
-	print "Sending Email..."
+	logMessage("Sending Email...")
 	server.close()
 	for fPath in fPaths:
 		os.remove(fPath)	
-	print "Email sent"
+	logMessage("Email sent")
 
 #combined main and manhole into one spreadsheet
 #
@@ -118,6 +122,7 @@ def CombineReport(filelist):
 					outsheet2.write(outrow_idx, col_idx, insheet.cell_value(row_idx, col_idx), saved_style)
 			outrow_idx += 1
 		file_idx += 1
+	logMessage("Combining reports...")
 	combinedReport = os.path.dirname(filelist[0]) + "/FlushingReport_" + yesterday.strftime("%Y%m%d") + ".xls"
 	wkbk.save(combinedReport)
 	return combinedReport
@@ -134,7 +139,7 @@ reportList = ["{0}/RPUD.SewerMainFlushing_{1}.xls".format(outputDir, yesterday.s
 filepaths = [CombineReport(reportList)]
 copy2(filepaths[0], "{0}/FR_copy_{1}.xls".format(os.path.dirname(filepaths[0]), yesterday.strftime("%Y%m%d")))
 filepaths_copy = ["{0}/FR_copy_{1}.xls".format(os.path.dirname(filepaths[0]), yesterday.strftime("%Y%m%d"))]
-print filepaths_copy
+
 ##send out email with attached excel report for previous day
 emailSub = "Daily Flushing Report"
 #message = "Hi, \n\n"
@@ -162,10 +167,11 @@ print '-' * 80
 
 
 #send daily report to Sewer Team Manager
-SendEmail(filepaths, isAttach, message, to, cc, emailSub)
+#SendEmail(filepaths, isAttach, message, to, cc, emailSub)
+logMessage("Email sent to sewer")
 #Notify GIS team member
 SendEmail(filepaths_copy, isAttach, "Flushing Report has been sent to Sewer team.", "zheng.li@raleighnc.gov", "", "Flushing Report Sent")
-
+logMessage("Email notification to GIS team")
 # else:
 # 	print "Fail to verify"
 
