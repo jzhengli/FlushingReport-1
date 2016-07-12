@@ -172,3 +172,15 @@
 2016-07-11 10:28:40,628 Report Merged: //corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/FlushingReport_20160710.xls
 2016-07-11 10:28:40,661 Email sent to sewer
 2016-07-11 10:28:40,691 Email notification to GIS team
+2016-07-12 00:14:41,490 ******************Export Flushing Report******************
+2016-07-12 00:14:48,164 Input table is: RPUD.SewerMainFlushing
+2016-07-12 00:14:48,164 Output Excel file is: RPUD.SewerMainFlushing_20160711.xls
+2016-07-12 00:14:54,351 20 RPUD.SewerMainFlushing reports for Jul 11, 2016
+2016-07-12 00:14:55,770 RPUD.SewerMainFlushing_20160711.xls has been exported.
+2016-07-12 00:14:55,825 Input table is: RPUD.SewerMHFlushing
+2016-07-12 00:14:55,825 Output Excel file is: RPUD.SewerMHFlushing_20160711.xls
+2016-07-12 00:14:57,851 2 RPUD.SewerMHFlushing reports for Jul 11, 2016
+2016-07-12 00:14:58,415 RPUD.SewerMHFlushing_20160711.xls has been exported.
+2016-07-12 00:14:58,526 Report Merged: //corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/FlushingReport_20160711.xls
+2016-07-12 00:14:58,736 Email sent to sewer
+2016-07-12 00:14:58,770 Email notification to GIS team
