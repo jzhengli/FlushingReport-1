@@ -20,13 +20,15 @@ def logMessage(msg):
     logging.warning(msg)
     return
 
-##export report of previous day to excel
+##export report to excel
 def ExportReport(table, delta_date):
 	env.overwriteOutput = True
 	env.workspace = "Database Connections/RPUD_TESTDB - MOBILE_EDIT_VERSION.sde"
 	#env.workspace = os.path.join(os.path.dirname(sys.argv[0]), "RPUD_TESTDB - MOBILE_EDIT_VERSION.sde") #the name of database connection may need to be changed when in production
 
-	today = datetime.date.today() + datetime.timedelta(hours=4)
+	#convert local time to UTC for query
+	now = datetime.date.today().strftime('%Y%m%d')
+	today = datetime.datetime(int(now[:4]), int(now[4:6]), int(now[6:]), 00, 00, 00) + datetime.timedelta(hours=4)
 	yesterday = today - datetime.timedelta(days=delta_date)
 	outputExcel = os.path.join("//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/", table + "_" + yesterday.strftime("%Y%m%d") + ".xls")
 	logMessage("Input table is: " + table)
@@ -34,7 +36,7 @@ def ExportReport(table, delta_date):
 	print ("Exporting table to Excel...")
 
 	#query report table for records in previous day
-	whereClause = '"CREATED_DATE" < date \'{0}\' AND "CREATED_DATE" > date \'{1}\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'.format(str(today), str(yesterday))
+	whereClause = '"CREATED_DATE" < timestamp \'{0}\' AND "CREATED_DATE" > timestamp \'{1}\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'.format(str(today), str(yesterday))
 	arcpy.MakeQueryTable_management(table, 'queryTable', "NO_KEY_FIELD", "", "", whereClause)
 	recordNum = arcpy.GetCount_management('queryTable')
 	logMessage(str(recordNum) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y"))
@@ -128,10 +130,9 @@ def CombineReport(filelist):
 	logMessage("Report Merged: " + combinedReport)
 	return combinedReport
 
-# pw = "2369" #raw_input("password to run script:")
-# print pw
-# if pw == "2369":
-# print "Verified..."
+
+##main
+
 logMessage("******************Export Flushing Report******************")
 outputDir = "//corfile/Public_Utilities_NS/5215_Capital_Improvement_Projects/636_Geographic_Info_System/Joe/Collector App/Flushing app/Daily Report/"
 deltaDate = 1 #can be changed if need multiple days report
@@ -156,7 +157,7 @@ message += "PUGIS"
 # cc = ""
 #email to send in production
 to = "jeffrey.bognar@raleighnc.gov"
-cc = "david.jackson@raleighnc.gov, chris.mosley@raleighnc.gov, tom.johnson@raleighnc.gov" ## email copy list
+cc = "david.jackson@raleighnc.gov, chris.mosley@raleighnc.gov, dustin.tripp@raleighnc.gov" #tom.johnson@raleighnc.gov" ## email copy list
 
 isAttach = True
 print 'Formatting email...'
