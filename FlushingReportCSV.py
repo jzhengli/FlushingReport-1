@@ -1,4 +1,6 @@
-import arcpy, os, sys, csv, datetime, email, smtplib, logging
+## Script for querying and sending daily sewer flushing report, output are csv files with date in local time
+## created by Joe Zheng Li, PUGIS, 2016/08/08
+import arcpy, os, sys, csv, datetime, time, smtplib, logging
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
@@ -6,32 +8,31 @@ from email.Utils import formatdate
 from email import Encoders
 from arcpy import env
 
-#working environment
 env.workspace = "Database Connections/RPUD_TESTDB.sde"
-#output directory
-outDir = "C:/data/"
+# output directory
+outDir = "C:/data/" #Change this path if necessary
 
-#related table and fields information
-#Gravity Main
+# related table and fields information
+# Gravity Main
 GM_table = "RPUD.SewerMainFlushing"
 GM_outFile = "GravityMainFlushingReport"
 GM_field_alias = ["REPORT DATE", "PU NUMBER", "CREW", "TEAM MEMBER", "TRUCK", "TASK", "FACILITYID", "DEBRIS", "ROOTS", "GREASE", "PIPE MATERIAL", "PIPE SIZE", "MH DIRECTION", "MH MATERIAL", "MH CONDITION", "NOZZLE", "FOOTAGE", "WEATHER", "JOB TYPE", "CUSTOMER CONTACT", "INVENTORY INFO", "CCTV FOLLOWUP", "REPAIR FOLLOWUP", "COMMENTS", "TIME START", "TIME END", "DURATION"]
 GM_field_names = ["REPORT_DATE", "PU_NUM", "CREW", "TEAM_MEMBER", "TRUCK", "TASK", "FACILITYID", "DEBRIS", "ROOTS", "GREASE", "PIPE_MATL", "PIPE_SIZE", "MH_DIR", "MH_MATL", "MH_COND", "NOZZLE", "FOOTAGE", "WEATHER", "TYPE", "CUST_CONTACT", "INV_INFO", "CCTV", "REPAIR", "COMMENTS", "TIME_START", "TIME_END", "DURATION"]
-#Mainhole
+# Mainhole
 MH_table = "RPUD.SewerMHFlushing"
 MH_outFile = "ManholeFlushingReport"
 MH_field_alias = ["REPORT DATE", "PU NUMBER", "FACILITYID", "TRUCK", "CREW LEADER", "TEAM MEMBER", "JOB TASK", "MH MATERIAL", "MH CONDITION", "DEBRIS", "ROOTS", "GREASE", "NOZZLE TYPE", "WEATHER", "JOB TYPE", "CUSTOMER CONTACT", "TIME START", "TIME END", "COMMENTS", "CCTV FOLLOWUP", "REPAIR FOLLOWUP", "INVENTORY INFO", "DURATION"]
 MH_field_names = ["REPORT_DATE", "PU_NUM", "FACILITYID", "TRUCK_NUM", "CREW", "TEAM_MEMBER", "TASK", "MH_MATL", "MH_COND", "DEBRIS", "ROOTS", "GREASE", "NOZZLE", "WEATHER", "TYPE", "CUST_CONTACT", "TIME_START", "TIME_END", "COMMENTS", "CCTV", "REPAIR", "INV_INFO", "DURATION"]
 
 
-logging.basicConfig(filename=os.path.join(os.path.dirname(sys.argv[0]),'updates.log'),level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(filename=os.path.join(os.path.dirname(sys.argv[0]), 'updates.log'), level=logging.INFO, format='%(asctime)s %(message)s')
 # log message to keep track
 def logMessage(msg):
     print time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime()) + msg
     logging.warning(msg)
     return
 
-#send email
+# send email
 def SendEmail(fPaths, isAttachmt, body, toList, ccList, bccList, subject):
 	
 	HOST = "cormailgw.raleighnc.gov"
@@ -65,7 +66,7 @@ def SendEmail(fPaths, isAttachmt, body, toList, ccList, bccList, subject):
 		os.remove(fPath)	
 	print ("Email sent")
 
-#query and export to csv file
+# query and export to csv file
 def exportToCSV(field_alias, field_names, table, outFile, outDir):
 	now = datetime.date.today().strftime('%Y%m%d')
 	today = datetime.datetime(int(now[:4]), int(now[4:6]), int(now[6:]), 00, 00, 00) + datetime.timedelta(hours=4)
@@ -88,7 +89,9 @@ def exportToCSV(field_alias, field_names, table, outFile, outDir):
 					if row.getValue(field.name) == None:
 						field_val = ""
 					elif field.type == "Date":
-						field_val = row.getValue(field.name) - datetime.timedelta(hours=4)
+						field_val = (row.getValue(field.name) - datetime.timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
+						# if field.name == "REPORT_DATE":
+						# 	field_val = (row.getValue(field.name) - datetime.timedelta(hours=4)).strftime("%Y-%m-%d")
 					else:
 						field_val = row.getValue(field.name)
 					field_vals.append(field_val)
@@ -98,7 +101,7 @@ def exportToCSV(field_alias, field_names, table, outFile, outDir):
 	return recordNum, outFullFile
 
 
-##main
+## main
 logMessage("******************Export Flushing Report******************")
 
 GMCount, GMAttach = exportToCSV(GM_field_alias, GM_field_names, GM_table, GM_outFile, outDir)
@@ -112,15 +115,15 @@ message += "\n\nGravity Main Flushing reports: {1}\nManhole Flushing reports: {2
 message += "\n\nThanks,\n"
 message += "PUGIS"
 
-#email to send in test
+# email to send in test
 # to = "joe.li@raleighnc.gov"
 # cc = ""
 # bcc = ""
-#email to send in production
+# email to send in production
 to = "jeffrey.bognar@raleighnc.gov"
 cc = "david.jackson@raleighnc.gov, chris.mosley@raleighnc.gov, dustin.tripp@raleighnc.gov" #tom.johnson@raleighnc.gov" ## email copy list
 bcc = "joe.li@raleighnc.gov" #to notify GIS team 
-#message to print
+# message to print
 isAttach = True
 print 'Formatting email...'
 print '-' * 80
@@ -131,6 +134,6 @@ if isAttach:
 print '-' * 80
 
 
-#send daily report to Sewer Team Manager
+# send daily report to Sewer Team Manager
 SendEmail(attachList, isAttach, message, to, cc, bcc, emailSub)
 logMessage("Email sent to sewer")
