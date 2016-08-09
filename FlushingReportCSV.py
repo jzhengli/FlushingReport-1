@@ -89,7 +89,10 @@ def exportToCSV(field_alias, field_names, table, outFile, outDir):
 					if row.getValue(field.name) == None:
 						field_val = ""
 					elif field.type == "Date":
-						field_val = (row.getValue(field.name) - datetime.timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
+						if row.getValue(field.name).year == 1899:
+							field_val = ""
+						else:
+							field_val = (row.getValue(field.name) - datetime.timedelta(hours=4)).strftime("%Y-%m-%d %H:%M:%S")
 						# if field.name == "REPORT_DATE":
 						# 	field_val = (row.getValue(field.name) - datetime.timedelta(hours=4)).strftime("%Y-%m-%d")
 					else:
