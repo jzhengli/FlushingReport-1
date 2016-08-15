@@ -68,24 +68,30 @@ def SendEmail(fPaths, isAttachmt, body, toList, ccList, bccList, subject):
 
 # query and export to csv file
 def exportToCSV(field_alias, field_names, table, outFile, outDir):
+	#calculate date and local timestamp 
 	now = datetime.date.today().strftime('%Y%m%d')
 	today = datetime.datetime(int(now[:4]), int(now[4:6]), int(now[6:]), 00, 00, 00) + datetime.timedelta(hours=4)
 	yesterday = today - datetime.timedelta(days=1)
+	#build query clause
 	whereClause = '"CREATED_DATE" <= timestamp \'{0}\' AND "CREATED_DATE" > timestamp \'{1}\' AND "CREW" NOT LIKE \'_GIS\' AND "CREW" NOT LIKE \'_test\' ORDER BY REPORT_DATE'.format(str(today), str(yesterday))	
 	arcpy.MakeQueryTable_management(table, 'queryTable' + table, "NO_KEY_FIELD", "", "", whereClause)
 	recordNum = arcpy.GetCount_management('queryTable' + table)
 	logMessage(str(recordNum) + " " + table + " reports for " + (yesterday).strftime("%b %d, %Y"))
-
+	#list fields
 	fields = arcpy.ListFields('queryTable' + table)
 
+	#write to csv
 	outFullFile = outFile + "_" + yesterday.strftime("%Y%m%d") + ".csv"
 	with open(os.path.join(outDir, outFullFile), 'wb') as f:
 		w = csv.writer(f)
 		w.writerow(field_alias)
-		for row in arcpy.SearchCursor("queryTable" + table):
+		rows = arcpy.SearchCursor("queryTable" + table)
+		row = rows.next()
+		for row in rows:
 			field_vals = []
 			for field in fields:
 				if field.name in field_names:
+					#remove none and invalid value and convert utc time to local
 					if row.getValue(field.name) == None:
 						field_val = ""
 					elif field.type == "Date":
@@ -99,7 +105,9 @@ def exportToCSV(field_alias, field_names, table, outFile, outDir):
 						field_val = row.getValue(field.name)
 					field_vals.append(field_val)
 			w.writerow(field_vals)
-		del row	
+		del row
+		del rows
+	f.close()
 
 	return recordNum, outFullFile
 
