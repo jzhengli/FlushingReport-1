@@ -1,5 +1,9 @@
---trigger for flagging flushing status
-
+/*trigger for flagging flushing status
+A80974 and D80974 are delta tables for sewer gravity main flushing report table
+A71030 is delta table for ssGravityMain feature class
+A81268 and D81268 are delta tables for sewer manhole flushing report table
+A71017 is delta table for sManhole feature class
+*/
 CREATE OR REPLACE TRIGGER RPUD.flushingGM_status 
  BEFORE INSERT ON RPUD.A80974
  FOR EACH ROW
